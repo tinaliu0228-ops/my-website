@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI动手指数调研</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .question {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+        .question-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        .question-title span {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 24px;
+            margin-right: 8px;
+            font-size: 14px;
+        }
+        .option {
+            display: block;
+            padding: 12px 15px;
+            margin: 8px 0;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .option:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        .option input {
+            margin-right: 10px;
+        }
+        .option.selected {
+            border-color: #667eea;
+            background: #e8ecff;
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .submit-btn:hover {
+            transform: scale(1.02);
+        }
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+        .score {
+            font-size: 48px;
+            font-weight: bold;
+            color: #667eea;
+            margin: 20px 0;
+        }
+        .level {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .level-desc {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .score-detail {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: left;
+            font-size: 14px;
+        }
+        .score-detail p {
+            margin: 5px 0;
+        }
+        .stats-link {
+            margin-top: 20px;
+            padding: 10px;
+            background: #f0f4ff;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI动手指数调研</h1>
+        <p class="subtitle">课前调研 · 了解你的AI实操能力</p>
+
+        <form id="survey-form">
+            <!-- 问题1 -->
+            <div class="question">
+                <div class="question-title"><span>1</span>你用AI工具写过代码或解决过具体工作问题吗？</div>
+                <label class="option">
+                    <input type="radio" name="q1" value="0" data-score="0"> 从没用过
+                </label>
+                <label class="option">
+                    <input type="radio" name="q1" value="1" data-score="1"> 偶尔用过，主要是问问题
+                </label>
+                <label class="option">
+                    <input type="radio" name="q1" value="2" data-score="2"> 经常用，能独立完成小任务
+                </label>
+                <label class="option">
+                    <input type="radio" name="q1" value="3" data-score="3"> 熟练使用，能完成复杂项目
+                </label>
+            </div>
+
+            <!-- 问题2 -->
+            <div class="question">
+                <div class="question-title"><span>2</span>你用过以下哪些AI工具/方式？（可多选）</div>
+                <label class="option">
+                    <input type="checkbox" name="q2" value="chat" data-score="1"> ChatGPT/豆包等对话工具
+                </label>
+                <label class="option">
+                    <input type="checkbox" name="q2" value="coding" data-score="2"> AI编程助手（Cursor、Codex、Claude Code等）
+                </label>
+                <label class="option">
+                    <input type="checkbox" name="q2" value="api" data-score="3"> 调用过AI的API接口
+                </label>
+                <label class="option">
+                    <input type="checkbox" name="q2" value="model" data-score="4"> 自己搭建或微调过AI模型
+                </label>
+                <label class="option">
+                    <input type="checkbox" name="q2" value="none" data-score="0"> 都没有
+                </label>
+            </div>
+
+            <!-- 问题3 -->
+            <div class="question">
+                <div class="question-title"><span>3</span>如果让AI帮你"把一个Excel表格按某列分组并生成汇总图表"，你会怎么做？</div>
+                <label class="option">
+                    <input type="radio" name="q3" value="0" data-score="0"> 不知道怎么下手
+                </label>
+                <label class="option">
+                    <input type="radio" name="q3" value="1" data-score="1"> 直接问AI对话工具，让它告诉我步骤
+                </label>
+                <label class="option">
+                    <input type="radio" name="q3" value="2" data-score="2"> 让AI写代码/脚本，我来运行
+                </label>
+                <label class="option">
+                    <input type="radio" name="q3" value="3" data-score="3"> 用AI工具直接执行完成
+                </label>
+            </div>
+
+            <button type="submit" class="submit-btn">提交问卷</button>
+        </form>
+
+        <div class="result" id="result">
+            <h2>感谢参与！</h2>
+            <div class="score" id="total-score">0</div>
+            <div class="level" id="level"></div>
+            <div class="level-desc" id="level-desc"></div>
+            <div class="score-detail" id="score-detail"></div>
+            <div class="stats-link">
+                📊 查看班级统计：<a href="stats.html" target="_blank">点击查看</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 选项样式
+        document.querySelectorAll('.option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                const input = this.querySelector('input');
+                if (input.type === 'radio') {
+                    this.closest('.question').querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+                    this.classList.add('selected');
+                } else {
+                    this.classList.toggle('selected');
+                }
+            });
+        });
+
+        // 提交表单
+        document.getElementById('survey-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // 计算Q1分数
+            const q1 = document.querySelector('input[name="q1"]:checked');
+            if (!q1) {
+                alert('请完成第1题');
+                return;
+            }
+            const q1Score = parseInt(q1.dataset.score);
+
+            // 计算Q2分数
+            const q2Checked = document.querySelectorAll('input[name="q2"]:checked');
+            if (q2Checked.length === 0) {
+                alert('请完成第2题');
+                return;
+            }
+            let q2Score = 0;
+            q2Checked.forEach(cb => {
+                if (cb.value !== 'none') {
+                    q2Score += parseInt(cb.dataset.score);
+                }
+            });
+
+            // 计算Q3分数
+            const q3 = document.querySelector('input[name="q3"]:checked');
+            if (!q3) {
+                alert('请完成第3题');
+                return;
+            }
+            const q3Score = parseInt(q3.dataset.score);
+
+            // 总分
+            const totalScore = q1Score + q2Score + q3Score;
+
+            // 确定等级
+            let level, levelDesc, emoji;
+            if (totalScore <= 3) {
+                level = '入门级';
+                levelDesc = '需要从基础工具使用开始学起';
+                emoji = '🌱';
+            } else if (totalScore <= 7) {
+                level = '进阶级';
+                levelDesc = '有一定基础，可深入学习实操场景';
+                emoji = '📚';
+            } else if (totalScore <= 11) {
+                level = '熟练级';
+                levelDesc = '能独立用AI解决大部分问题';
+                emoji = '⚡';
+            } else {
+                level = '专家级';
+                levelDesc = '可挑战高阶应用和模型定制';
+                emoji = '🚀';
+            }
+
+            // 显示结果
+            document.getElementById('survey-form').style.display = 'none';
+            document.getElementById('result').style.display = 'block';
+            document.getElementById('total-score').textContent = totalScore + '分';
+            document.getElementById('level').textContent = emoji + ' ' + level;
+            document.getElementById('level-desc').textContent = levelDesc;
+            document.getElementById('score-detail').innerHTML = `
+                <p><strong>得分明细：</strong></p>
+                <p>Q1（使用深度）：${q1Score}分</p>
+                <p>Q2（工具广度）：${q2Score}分</p>
+                <p>Q3（实操能力）：${q3Score}分</p>
+                <p><strong>总分：${totalScore}/16分</strong></p>
+            `;
+
+            // 保存到本地存储
+            const results = JSON.parse(localStorage.getItem('survey_results') || '[]');
+            results.push({
+                timestamp: new Date().toISOString(),
+                q1: q1Score,
+                q2: q2Score,
+                q3: q3Score,
+                total: totalScore,
+                level: level
+            });
+            localStorage.setItem('survey_results', JSON.stringify(results));
+        });
+    </script>
+</body>
+</html>

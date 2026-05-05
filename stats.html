@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>班级AI动手指数统计</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .avg-score {
+            font-size: 56px;
+            font-weight: bold;
+        }
+        .avg-level {
+            font-size: 24px;
+            margin-top: 10px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .stat-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .distribution {
+            margin-bottom: 30px;
+        }
+        .distribution h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .bar-container {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+        .bar-label {
+            width: 80px;
+            font-size: 14px;
+        }
+        .bar {
+            flex: 1;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 0 10px;
+        }
+        .bar-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.5s;
+        }
+        .bar-count {
+            width: 50px;
+            text-align: right;
+            font-weight: bold;
+        }
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .results-table th, .results-table td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .results-table th {
+            background: #f8f9fa;
+            color: #333;
+        }
+        .no-data {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+        }
+        .actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 1px solid #e0e0e0;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 班级AI动手指数统计</h1>
+
+        <div id="stats-content">
+            <div class="no-data">
+                <p>暂无数据</p>
+                <p style="margin-top:10px; font-size:14px;">请先让学员填写问卷</p>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="btn btn-secondary" onclick="exportData()">导出数据</button>
+            <button class="btn btn-secondary" onclick="clearData()" style="color:#e74c3c;">清空数据</button>
+            <a href="index.html" class="btn btn-primary" style="text-decoration:none;">返回问卷</a>
+        </div>
+    </div>
+
+    <script>
+        function renderStats() {
+            const results = JSON.parse(localStorage.getItem('survey_results') || '[]');
+
+            if (results.length === 0) {
+                document.getElementById('stats-content').innerHTML = `
+                    <div class="no-data">
+                        <p>暂无数据</p>
+                        <p style="margin-top:10px; font-size:14px;">请先让学员填写问卷</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // 计算统计数据
+            const total = results.length;
+            const avgScore = results.reduce((sum, r) => sum + r.total, 0) / total;
+            const avgQ1 = results.reduce((sum, r) => sum + r.q1, 0) / total;
+            const avgQ2 = results.reduce((sum, r) => sum + r.q2, 0) / total;
+            const avgQ3 = results.reduce((sum, r) => sum + r.q3, 0) / total;
+
+            // 等级分布
+            const levels = {
+                '入门级': results.filter(r => r.total <= 3).length,
+                '进阶级': results.filter(r => r.total > 3 && r.total <= 7).length,
+                '熟练级': results.filter(r => r.total > 7 && r.total <= 11).length,
+                '专家级': results.filter(r => r.total > 11).length
+            };
+
+            // 平均等级
+            let avgLevel, emoji;
+            if (avgScore <= 3) {
+                avgLevel = '入门级';
+                emoji = '🌱';
+            } else if (avgScore <= 7) {
+                avgLevel = '进阶级';
+                emoji = '📚';
+            } else if (avgScore <= 11) {
+                avgLevel = '熟练级';
+                emoji = '⚡';
+            } else {
+                avgLevel = '专家级';
+                emoji = '🚀';
+            }
+
+            // 渲染
+            document.getElementById('stats-content').innerHTML = `
+                <div class="stats-card">
+                    <div class="avg-score">${avgScore.toFixed(1)}分</div>
+                    <div class="avg-level">${emoji} ${avgLevel}</div>
+                    <div style="margin-top:10px; opacity:0.8;">班级平均AI动手指数</div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value">${total}</div>
+                        <div class="stat-label">参与人数</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${Math.max(...results.map(r => r.total))}</div>
+                        <div class="stat-label">最高分</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${Math.min(...results.map(r => r.total))}</div>
+                        <div class="stat-label">最低分</div>
+                    </div>
+                </div>
+
+                <div class="distribution">
+                    <h3>等级分布</h3>
+                    ${Object.entries(levels).map(([level, count]) => `
+                        <div class="bar-container">
+                            <div class="bar-label">${level}</div>
+                            <div class="bar">
+                                <div class="bar-fill" style="width: ${(count/total*100)}%"></div>
+                            </div>
+                            <div class="bar-count">${count}人</div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div class="distribution">
+                    <h3>各题平均分</h3>
+                    <div class="bar-container">
+                        <div class="bar-label">Q1 使用深度</div>
+                        <div class="bar">
+                            <div class="bar-fill" style="width: ${(avgQ1/3*100)}%"></div>
+                        </div>
+                        <div class="bar-count">${avgQ1.toFixed(1)}/3</div>
+                    </div>
+                    <div class="bar-container">
+                        <div class="bar-label">Q2 工具广度</div>
+                        <div class="bar">
+                            <div class="bar-fill" style="width: ${(avgQ2/10*100)}%"></div>
+                        </div>
+                        <div class="bar-count">${avgQ2.toFixed(1)}/10</div>
+                    </div>
+                    <div class="bar-container">
+                        <div class="bar-label">Q3 实操能力</div>
+                        <div class="bar">
+                            <div class="bar-fill" style="width: ${(avgQ3/3*100)}%"></div>
+                        </div>
+                        <div class="bar-count">${avgQ3.toFixed(1)}/3</div>
+                    </div>
+                </div>
+
+                <h3 style="margin-bottom:15px;">详细数据</h3>
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th>序号</th>
+                            <th>Q1</th>
+                            <th>Q2</th>
+                            <th>Q3</th>
+                            <th>总分</th>
+                            <th>等级</th>
+                            <th>时间</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${results.map((r, i) => `
+                            <tr>
+                                <td>${i + 1}</td>
+                                <td>${r.q1}</td>
+                                <td>${r.q2}</td>
+                                <td>${r.q3}</td>
+                                <td><strong>${r.total}</strong></td>
+                                <td>${r.level}</td>
+                                <td>${new Date(r.timestamp).toLocaleString('zh-CN')}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function exportData() {
+            const results = JSON.parse(localStorage.getItem('survey_results') || '[]');
+            if (results.length === 0) {
+                alert('暂无数据可导出');
+                return;
+            }
+
+            let csv = '序号,Q1,Q2,Q3,总分,等级,时间\n';
+            results.forEach((r, i) => {
+                csv += `${i+1},${r.q1},${r.q2},${r.q3},${r.total},${r.level},${r.timestamp}\n`;
+            });
+
+            const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `AI动手指数统计_${new Date().toLocaleDateString()}.csv`;
+            a.click();
+        }
+
+        function clearData() {
+            if (confirm('确定要清空所有数据吗？')) {
+                localStorage.removeItem('survey_results');
+                renderStats();
+            }
+        }
+
+        renderStats();
+    </script>
+</body>
+</html>
