@@ -1,23 +1,8 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "*.html",
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/",
-      "dest": "/index.html"
-    },
-    {
-      "src": "/stats",
-      "dest": "/stats.html"
-    },
-    {
-      "src": "/qr",
-      "dest": "/qr.html"
-    }
+  "rewrites": [
+    { "source": "/api/survey", "destination": "/api/survey" },
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/stats", "destination": "/stats.html" },
+    { "source": "/qr", "destination": "/qr.html" }
   ]
 }

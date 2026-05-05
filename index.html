@@ -299,17 +299,24 @@
                 <p><strong>总分：${totalScore}/16分</strong></p>
             `;
 
-            // 保存到本地存储
-            const results = JSON.parse(localStorage.getItem('survey_results') || '[]');
-            results.push({
-                timestamp: new Date().toISOString(),
+            // 提交到服务器
+            const submitData = {
                 q1: q1Score,
                 q2: q2Score,
                 q3: q3Score,
                 total: totalScore,
                 level: level
-            });
-            localStorage.setItem('survey_results', JSON.stringify(results));
+            };
+
+            fetch('/api/survey', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(submitData)
+            }).catch(err => console.log('保存到服务器失败:', err));
+
+            // 显示结果
         });
     </script>
 </body>

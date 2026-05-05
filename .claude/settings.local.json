@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm i *)",
+      "Bash(vercel --prod)",
+      "Bash(vercel login *)",
+      "Bash(gh repo *)",
+      "Bash(git remote *)",
+      "Bash(git push *)",
+      "Bash(npx vercel *)",
+      "Bash(npm install *)",
+      "Bash(node *)",
+      "Bash(git add *)",
+      "Bash(git commit *)"
+    ]
+  }
+}

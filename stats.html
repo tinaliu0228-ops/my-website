@@ -145,6 +145,11 @@
         .btn:hover {
             transform: scale(1.05);
         }
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+        }
     </style>
 </head>
 <body>
@@ -152,13 +157,13 @@
         <h1>📊 班级AI动手指数统计</h1>
 
         <div id="stats-content">
-            <div class="no-data">
-                <p>暂无数据</p>
-                <p style="margin-top:10px; font-size:14px;">请先让学员填写问卷</p>
+            <div class="loading">
+                <p>正在加载数据...</p>
             </div>
         </div>
 
         <div class="actions">
+            <button class="btn btn-secondary" onclick="refreshData()">刷新数据</button>
             <button class="btn btn-secondary" onclick="exportData()">导出数据</button>
             <button class="btn btn-secondary" onclick="clearData()" style="color:#e74c3c;">清空数据</button>
             <a href="index.html" class="btn btn-primary" style="text-decoration:none;">返回问卷</a>
@@ -166,9 +171,24 @@
     </div>
 
     <script>
-        function renderStats() {
-            const results = JSON.parse(localStorage.getItem('survey_results') || '[]');
+        let results = [];
 
+        async function loadData() {
+            try {
+                const response = await fetch('/api/survey');
+                results = await response.json();
+                renderStats();
+            } catch (error) {
+                document.getElementById('stats-content').innerHTML = `
+                    <div class="no-data">
+                        <p>加载失败，请稍后重试</p>
+                        <p style="margin-top:10px; font-size:14px;">${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderStats() {
             if (results.length === 0) {
                 document.getElementById('stats-content').innerHTML = `
                     <div class="no-data">
@@ -301,8 +321,11 @@
             `;
         }
 
+        function refreshData() {
+            loadData();
+        }
+
         function exportData() {
-            const results = JSON.parse(localStorage.getItem('survey_results') || '[]');
             if (results.length === 0) {
                 alert('暂无数据可导出');
                 return;
@@ -321,14 +344,19 @@
             a.click();
         }
 
-        function clearData() {
+        async function clearData() {
             if (confirm('确定要清空所有数据吗？')) {
-                localStorage.removeItem('survey_results');
-                renderStats();
+                try {
+                    await fetch('/api/survey', { method: 'DELETE' });
+                    results = [];
+                    renderStats();
+                } catch (error) {
+                    alert('清空失败：' + error.message);
+                }
             }
         }
 
-        renderStats();
+        loadData();
     </script>
 </body>
 </html>
